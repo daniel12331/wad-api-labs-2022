@@ -3,7 +3,12 @@ import bcrypt from 'bcrypt-nodejs';
 
 const Schema = mongoose.Schema;
 
-  
+function checkPassword(str)
+{
+  var regularExpression = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{5,}$/);
+  return regularExpression.test(str);
+}
+
   const UserSchema = new Schema({
     username: { type: String, unique: true, required: true},
     password: {type: String, required: true },
@@ -26,6 +31,12 @@ const Schema = mongoose.Schema;
   UserSchema.pre('save', function(next) {
     const user = this;
     if (this.isModified('password') || this.isNew) {
+      if(!checkPassword(user.password)) {
+
+        return next(err);
+        
+      }
+
         bcrypt.genSalt(10, (err, salt)=> {
             if (err) {
                 return next(err);
